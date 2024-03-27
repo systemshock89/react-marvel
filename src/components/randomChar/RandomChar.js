@@ -8,13 +8,14 @@ import mjolnir from '../../resources/img/mjolnir.png';
 
 class RandomChar extends Component{
 
-    constructor(props) {
-        super(props);
-        this.updateChar(); // пока так. но позже переделать. Warning: Can't call setState on a component that is not yet mounted
+    // constructor(props) {
+        // super(props);
+        // this.updateChar(); // Будет Warning: Can't call setState on a component that is not yet mounted
         // нельзя вызывать этот метод внутри конструктора. Следствие этого: придет два объекта при вызове (минус для оптимизации):
+        // см ур.151
         // .getAllCharacters()
         // .then(res => console.log(res))
-    }
+    // }
 
     state = {
         char: {},
@@ -24,10 +25,14 @@ class RandomChar extends Component{
         // homepage: null,
         // wiki: null
         loading: true, // идет загрузка объекта или нет
-        error: false 
+        error: false,
     }
 
     marvelService = new MarvelService();
+
+    componentDidMount() {
+        this.updateChar();
+    }
 
     // когда персонаж загрузился
     onCharLoaded = (char) => {
@@ -35,6 +40,13 @@ class RandomChar extends Component{
             char, // char: char
             loading: false, // как только загрузятся данные, позиция становится false
         }) 
+    }
+
+    // когда персонаж существует, нажимаем кнопку try it и загружаем новгго
+    onCharLoading = () => {
+        this.setState({
+            loading: true
+        })
     }
 
     // отлавливаем ошибку 404, кот-я появляется если такого пользователя нет
@@ -48,7 +60,8 @@ class RandomChar extends Component{
     updateChar = () => {
         const id = Math.floor(Math.random() * (1011400 - 1011000) + 1011000); // создадим случайное число в определенном промежутке и округлим его
         // example 1011005
-
+        
+        this.onCharLoading();
         this.marvelService
             .getCharacter(id)
             .then(this.onCharLoaded)
@@ -81,7 +94,7 @@ class RandomChar extends Component{
                     <p className="randomchar__title">
                         Or choose another one
                     </p>
-                    <button className="button button__main">
+                    <button className="button button__main" onClick={this.updateChar}>
                         <div className="inner">try it</div>
                     </button>
                     <img src={mjolnir} alt="mjolnir" className="randomchar__decoration"/>
@@ -94,10 +107,14 @@ class RandomChar extends Component{
 // простой рендерящий компонент
 const View = ({char}) => {
     const {name, description, thumbnail, homepage, wiki} = char;
+    let imgStyle = {'objectFit' : 'cover'};
+    if (thumbnail === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg') {
+        imgStyle = {'objectFit' : 'contain'};
+    }
 
     return(
         <div className="randomchar__block">
-            <img src={thumbnail} alt="Random character" className="randomchar__img"/>
+            <img src={thumbnail} alt="Random character" className="randomchar__img" style={imgStyle}/>
             <div className="randomchar__info">
                 <p className="randomchar__name">{name}</p>
                 <p className="randomchar__descr">
