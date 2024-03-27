@@ -42,7 +42,7 @@ class RandomChar extends Component{
         }) 
     }
 
-    // когда персонаж существует, нажимаем кнопку try it и загружаем новгго
+    // когда персонаж уже существует, нажимаем кнопку try it и загружаем новгго
     onCharLoading = () => {
         this.setState({
             loading: true
@@ -61,7 +61,7 @@ class RandomChar extends Component{
         const id = Math.floor(Math.random() * (1011400 - 1011000) + 1011000); // создадим случайное число в определенном промежутке и округлим его
         // example 1011005
         
-        this.onCharLoading();
+        this.onCharLoading(); // перед тем как запустится обновление персонажа покажем спиннер
         this.marvelService
             .getCharacter(id)
             .then(this.onCharLoaded)
