@@ -1,6 +1,7 @@
 class MarvelService {
     _apiBase = 'https://gateway.marvel.com:443/v1/public/'; // пер-я начинается с подчеркивания - говорит о том, что это запрещено изменять
     _apiKey = 'apikey=a69aadd3cee4bd52ac851e95515c1aaa';
+    _baseOffset = 210; // начнем с персонажа №210 тк вначале мало информации в персах
 
     getResource = async (url) => {
         let res = await fetch(url);
@@ -13,8 +14,8 @@ class MarvelService {
         return await res.json();
     }
 
-    getAllCharacters = async () => {
-        const res = await this.getResource(`${this._apiBase}characters?limit=9&offset=210&${this._apiKey}`);
+    getAllCharacters = async (offset = this._baseOffset) => {
+        const res = await this.getResource(`${this._apiBase}characters?limit=9&offset=${offset}&${this._apiKey}`);
         return res.data.results.map(this._transformCharacter); // вернем массив с объектами, кот-е нужны
     }
 

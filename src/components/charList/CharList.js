@@ -9,23 +9,74 @@ class CharList extends Component{
 
     state = {
         charList: [],
-        loading: true, 
+        loading: true, // запускается при первичной загрузке первых 9 персов
         error: false,
+        newItemLoading: false, // запускается во время загрузки новых эл-тов после клика "показать еще"
+        offset: 210, // каждый раз когда завершен запрос на сервер увеличивает отступ на 9 персонажей (можно вставить большое число и потестировать ситуацию, когда закончились персонажи)
+        charEnded: false // если закончились персонажи
     }
 
     marvelService = new MarvelService();
 
     componentDidMount() {
-        this.marvelService.getAllCharacters()
+        this.onRequest(); 
+        // Первый раз посылаем запрос на сервер, не передавая offset (он будет подставлен из _baseOffset)
+    }
+
+    // запрос на сервер
+    onRequest = (offset) => {
+        this.onCharListLoading();
+        this.marvelService.getAllCharacters(offset)
         .then(this.onCharListLoaded)
         .catch(this.onError)
     }
 
-    onCharListLoaded = (charList) => {
+    // когда запустился запрос onRequest и там что-то грузится, переключим состояние в newItemLoading: true
+    onCharListLoading = () => {
         this.setState({
-            charList, 
+            newItemLoading: true
+        })
+    }
+
+    // когда персонажи загрузились получаем новые данные, из которых будем формировать новое состояние
+    // если мы первый раз запускаем этот метод, то в ...charList пустой массив, кот-й ни во что не развернется
+    // и у нас будет только ...newCharList, кот-я развернется в новые эл-ты.
+    // В последующих запусках в ...charList будут старые эл-ты, а в ...newCharList новые.
+    // В итоге они будут складываться в один массив.
+    onCharListLoaded = (newCharList) => {
+
+        /*
+        Ситауция - когда загрузились все персонажи и подгружать больше нечего.
+        При клике на кнопку "загрузить еще" не будет ошибки, тк бекэнд спроектирован правильно и пришлет пустой массив.
+        Но кнопку надо скрыть. Лучше стилями, тк если ее физически удалять, то компонент надо будет перерисовывать.
+
+        Здесь в логиге не реализован случай:
+        Когда последние 9 эл-то приходят, то кнопка будет удаляться.
+
+        Также не реализовано запоминание количества уже загруженных эл-тов на страницу
+        
+        Динамически вычислим, если длина нового массива < 9 и помещаем ended в state
+        */
+        let ended = false;
+        if(newCharList.length < 9){
+            ended = true;
+        }
+
+        // формируем не 9 персонажей, а подгружаем каждый раз еще по 9. state зависит от предыдущуего stat'а. 
+        // Вовзращаем объект из ф-и setState и передаем charList, подвергнутый деструктуризации
+        this.setState(({offset, charList}) => ({
+            charList: [...charList, ...newCharList], // разворачиваем старый массив charList и добавляем newCharList
             loading: false, 
-        }) 
+            newItemLoading: false,
+            offset: offset + 9,
+            charEnded: ended
+        })) 
+
+        // this.setState({
+        //     charList, 
+        //     loading: false, 
+        //     newItemLoading: false
+        // }) 
     }
 
     onError = () => {
@@ -63,7 +114,7 @@ class CharList extends Component{
     }
 
     render (){
-        const {charList, loading, error} = this.state;
+        const {charList, loading, error, offset, newItemLoading, charEnded} = this.state;
 
         const items = this.renderItems(charList);
 
@@ -76,7 +127,11 @@ class CharList extends Component{
                 {errorMessage}
                 {spinner}
                 {content}
-                <button className="button button__main button__long">
+                <button 
+                    className="button button__main button__long"
+                    disabled={newItemLoading} 
+                    style={{'display': charEnded ? 'none' : 'block'}}
+                    onClick={() => this.onRequest(offset)}>
                     <div className="inner">load more</div>
                 </button>
             </div>
