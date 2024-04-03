@@ -19,6 +19,11 @@ const useMarvelService = () => {
         return _transformCharacter(res.data.results[0]);
     }
 
+    const getAllComics = async (offset = 0) => {
+        const res = await request(`${_apiBase}comics?orderBy=issueNumber&limit=8&offset=${offset}&${_apiKey}`);
+        return res.data.results.map(_transformComics); 
+    }  
+
     // метод получает большой объект с данными, а отдает только те, кот-е нам нужны
     const _transformCharacter = (char) => {
         return {
@@ -32,7 +37,18 @@ const useMarvelService = () => {
         }
     };
 
-    return {loading, error, getAllCharacters, getCharacter, clearError};
+    const _transformComics = (comics) => {
+        return {
+            id: comics.id,
+            title: comics.title,
+            thumbnail: comics.thumbnail.path + '.' + comics.thumbnail.extension,
+            price: comics.prices[0].price
+				? `${comics.prices[0].price}$`
+				: "not available",
+        }
+    };
+
+    return {loading, error, getAllCharacters, getCharacter, getAllComics, clearError};
 }
 
 export default useMarvelService;
