@@ -3,37 +3,30 @@ import PropTypes from 'prop-types';
 
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
-import MarvelService from '../../services/MarvelService';
+import useMarvelService from '../../services/MarvelService';
 
 import './charList.scss';
 
 const CharList = (props) => {
 
     const [charList, setCharList] = useState([]);
-    const [loading, setLoading] = useState(true); // запускается при первичной загрузке первых 9 персов
-    const [error, setError] = useState(false);
     const [newItemLoading, setNewItemLoading] = useState(false); // запускается во время загрузки новых эл-тов после клика "показать еще"
     const [offset, setOffset] = useState(210); // каждый раз когда завершен запрос на сервер увеличивает отступ на 9 персонажей (можно вставить большое число и потестировать ситуацию, когда закончились персонажи)
     const [charEnded, setCharEnded] = useState(false); // если закончились персонажи
 
-    const marvelService = new MarvelService();
+    const {loading, error, getAllCharacters} = useMarvelService();
 
     useEffect(() => { // useEffect запускается после рендера, поэтому в этом случае мы можем исп-ть стрелочную ф-ю выше, чем она объявлена
-        onRequest();
-        // Первый раз посылаем запрос на сервер, не передавая offset (он будет подставлен из _baseOffset)
+        onRequest(offset, true);
     }, [])
 
     // запрос на сервер
-    const onRequest = (offset) => {
-        onCharListLoading();
-        marvelService.getAllCharacters(offset)
+    const onRequest = (offset, initial) => {
+        // initial: true - первичная загрузка
+        // initial: false - повторная загрузка по нажатию кнопки "показать еще"
+        initial ? setNewItemLoading(false) : setNewItemLoading(true);     
+        getAllCharacters(offset)
         .then(onCharListLoaded)
-        .catch(onError)
-    }
-
-    // когда запустился запрос onRequest и там что-то грузится, переключим состояние в newItemLoading: true
-    const onCharListLoading = () => {
-        setNewItemLoading(true);
     }
 
     // когда персонажи загрузились получаем новые данные, из которых будем формировать новое состояние
@@ -64,7 +57,6 @@ const CharList = (props) => {
         // Вовзращаем объект из ф-и setState и передаем charList, подвергнутый деструктуризации
         setCharList(charList => [...charList, ...newCharList]); // разворачиваем старый массив charList и добавляем newCharList
         // setLoading(loading => false);
-        setLoading(false); // не важно, что было в предыдущем state поэтому просто передадим false
         setNewItemLoading(newItemLoading => false);
         setOffset(offset => offset + 9)
         setCharEnded(charEnded => ended);
@@ -74,11 +66,6 @@ const CharList = (props) => {
         //     loading: false, 
         //     newItemLoading: false
         // }) 
-    }
-
-    const onError = () => {
-        setError(true); // не важно, что было в предыдущем state, поэтому просто передадим true
-        setLoading(false);
     }
 
     const itemRefs = useRef([]);
@@ -137,14 +124,14 @@ const CharList = (props) => {
     const items = renderItems(charList);
 
     const errorMessage = error ?  <ErrorMessage/> : null;
-    const spinner = loading ? <Spinner/> : null;
-    const content = !(loading || error) ? items : null;
+    const spinner = loading && !newItemLoading ? <Spinner/> : null; // есть загрузка, но не загрузка новых компонетов: 
+    // тогда спиннер грузится только при первой загрузке страницы. А при нажатии "показать еще" спиннера уже нет
 
     return (
         <div className="char__list">
             {errorMessage}
             {spinner}
-            {content}
+            {items}
             <button 
                 className="button button__main button__long"
                 disabled={newItemLoading} 

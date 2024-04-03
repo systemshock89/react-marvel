@@ -1,27 +1,15 @@
 import { useEffect, useState } from 'react';
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
-import MarvelService from '../../services/MarvelService';
+import useMarvelService from '../../services/MarvelService';
 
 import './randomChar.scss';
 import mjolnir from '../../resources/img/mjolnir.png';
 
 const RandomChar = () => {
 
-    // constructor(props) {
-        // super(props);
-        // this.updateChar(); // Будет Warning: Can't call setState on a component that is not yet mounted
-        // нельзя вызывать этот метод внутри конструктора. Следствие этого: придет два объекта при вызове (минус для оптимизации):
-        // см ур.151
-        // .getAllCharacters()
-        // .then(res => console.log(res))
-    // }
-
     const [char, setChar] = useState({});
-    const [loading, setLoading] = useState(true); // идет загрузка объекта или нет
-    const [error, setError] = useState(false);
-
-    const marvelService = new MarvelService();
+    const {loading, error, getCharacter, clearError} = useMarvelService();
 
     useEffect(() => {
         updateChar();
@@ -35,29 +23,19 @@ const RandomChar = () => {
     // когда персонаж загрузился
     const onCharLoaded = (char) => {
         setChar(char); // char: char
-        setLoading(false); // как только загрузятся данные, позиция становится false
-    }
-
-    // когда персонаж уже существует, нажимаем кнопку try it и загружаем новгго
-    const onCharLoading = () => {
-        setLoading(true);
-    }
-
-    // отлавливаем ошибку 404, кот-я появляется если такого пользователя нет
-    const onError = () => {
-        setLoading(false);
-        setError(true);
     }
 
     const updateChar = () => {
+
+        // если запрос вызвал ошибку, то по следующему нажатию на кнопку "Try it" подгрузить нового перса не получится, тк появилась js ошибка
+        // Чтобы этого не произошло, нужно перед каждым новым запросом чистить ошибку
+        clearError();
+
         const id = Math.floor(Math.random() * (1011400 - 1011000) + 1011000); // создадим случайное число в определенном промежутке и округлим его
         // example 1011005
         
-        onCharLoading(); // перед тем как запустится обновление персонажа покажем спиннер
-        marvelService
-            .getCharacter(id)
-            .then(onCharLoaded)
-            .catch(onError);
+        getCharacter(id)
+            .then(onCharLoaded);
     }
 
     // если необходимо несколько вещей отображать в зависимости от состояний:
