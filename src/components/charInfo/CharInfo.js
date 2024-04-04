@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 import useMarvelService from '../../services/MarvelService';
@@ -85,10 +86,18 @@ const View = ({char}) => {
                     
                     if(i > 9) return; // если в массиве много эл-то, то этот способ даст просадки по производительности, тк будет проходится по всем ним
                     // нужно переписывать на стандартный цикл с break. Но формировать новый массив, а не мутировать текущий
+    
+                    const comicId = item.resourceURI.match(/\d+$/)[0];
+                    /**
+                     * регулярное выражение \d+$ будет соответствовать последовательности цифр в конце строки.
+                     * Функция match() возвращает массив совпадений. 
+                     * Поэтому мы берем первый элемент этого массива [0], который содержит найденное число.
+                     */
 
                     return (
+                        
                         <li key={i} className="char__comics-item">
-                            {item.name}
+                            <Link to={`/comics/${comicId}`}>{item.name}</Link>
                         </li> 
                     )
                 })

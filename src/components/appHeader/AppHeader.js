@@ -16,8 +16,9 @@ const AppHeader = () => {
                         style={({ isActive }) => ({ color: isActive ? '#9f0013' : 'inherit' })}
                         to="/">Characters</NavLink></li>
                     /
+
+                    {/* уберем end, чтобы все ссылки, где есть /comics окрашивались в красный - для внутряков */}
                     <li><NavLink 
-                        end 
                         style={({ isActive }) => ({ color: isActive ? '#9f0013' : 'inherit' })}
                         to="/comics">Comics</NavLink></li>
                 </ul>
