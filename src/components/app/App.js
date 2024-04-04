@@ -5,7 +5,7 @@ import AppHeader from "../appHeader/AppHeader";
 
 const App = () => {
     return (
-        <Router>
+        <Router basename={'/react-marvel'}>
             <div className="app">
                 <AppHeader/>
                 <main>
