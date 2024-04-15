@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client'; // for react 18
 // import ReactDOM from 'react-dom'; // for react 17
 import App from './components/app/App';
 import './style/style.scss';
-import { flushSync } from 'react-dom';
+// import { flushSync } from 'react-dom';
 
 // for react 18
 ReactDOM

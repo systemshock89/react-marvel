@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import {CSSTransition, TransitionGroup} from 'react-transition-group';
 
@@ -38,6 +38,7 @@ const CharList = (props) => {
 
     useEffect(() => { // useEffect запускается после рендера, поэтому в этом случае мы можем исп-ть стрелочную ф-ю выше, чем она объявлена
         onRequest(offset, true);
+        // eslint-disable-next-line
     }, [])
 
     // запрос на сервер
@@ -152,10 +153,20 @@ const CharList = (props) => {
     // const spinner = loading && !newItemLoading ? <Spinner/> : null; // есть загрузка, но не загрузка новых компонетов: 
     // тогда спиннер грузится только при первой загрузке страницы. А при нажатии "показать еще" спиннера уже нет
 
+    // починим баг: при первом клике по эл-ту из списка он не выделяется красным. При втором клике выделяется.
+    // это происходит из-за лишнего перерендера компонента CharList, кот-й вызывает повторный запуск ф-и setContent
+    // а класс активности для выделения красным должен был проставиться у старого компонента, а не у нового.
+    // для решения используем useMemo и перерендериваем ф-ю setContent только при изменении process
+    const elements = useMemo(() => {
+        return setContent(process, () => renderItems(charList), newItemLoading);
+        // eslint-disable-next-line
+    }, [process])
+
     return (
         <div className="char__list">
 
-            {setContent(process, () => renderItems(charList), newItemLoading)}
+            {elements}
+            {/* {setContent(process, () => renderItems(charList), newItemLoading)} */}
             {/* Здесь нет компонента View. Вместо него есть ф-я renderItems(charList), кот-я возвращает кусочек верстки.
              Ее и передадим в качетсве компонента (второй арг)  */}
 

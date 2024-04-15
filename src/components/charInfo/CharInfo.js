@@ -15,6 +15,7 @@ const CharInfo = (props) => {
 
     useEffect(() => {
         updateChar()
+        // eslint-disable-next-line
     }, [props.charId])
 
    const updateChar = () => {
@@ -88,7 +89,7 @@ const View = ({data}) => {
             {comics.length > 0 ? null : 'Нет комиксов'}
             {
                 comics.map((item, i) => {
-                    
+                    // eslint-disable-next-line
                     if(i > 9) return; // если в массиве много эл-то, то этот способ даст просадки по производительности, тк будет проходится по всем ним
                     // нужно переписывать на стандартный цикл с break. Но формировать новый массив, а не мутировать текущий
     
