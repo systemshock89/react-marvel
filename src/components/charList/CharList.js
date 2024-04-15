@@ -8,6 +8,25 @@ import useMarvelService from '../../services/MarvelService';
 
 import './charList.scss';
 
+// в этом компоненте особенная логика у setContent:
+// исп-ся newItemLoading
+// поэтому напишем здесь свою.
+// Обычная ф-я setContent сломает пагинацию
+const setContent = (process, Component, newItemLoading) => {
+    switch(process) {
+        case 'waiting':
+            return <Spinner/>;
+        case 'loading':
+            return newItemLoading ? <Component/> : <Spinner/>; // если грузятся НОВЫЕ элементы, то ничего не меняем на странице. Если нет - то это первая загрузка - покажем спиннер
+        case 'confirmed':
+            return <Component/>;
+        case 'error':
+            return <ErrorMessage/>
+        default:
+            throw new Error('Unexpected process state');
+    }
+}
+
 const CharList = (props) => {
 
     const [charList, setCharList] = useState([]);
@@ -15,7 +34,7 @@ const CharList = (props) => {
     const [offset, setOffset] = useState(210); // каждый раз когда завершен запрос на сервер увеличивает отступ на 9 персонажей (можно вставить большое число и потестировать ситуацию, когда закончились персонажи)
     const [charEnded, setCharEnded] = useState(false); // если закончились персонажи
 
-    const {loading, error, getAllCharacters} = useMarvelService();
+    const {getAllCharacters, process, setProcess} = useMarvelService();
 
     useEffect(() => { // useEffect запускается после рендера, поэтому в этом случае мы можем исп-ть стрелочную ф-ю выше, чем она объявлена
         onRequest(offset, true);
@@ -27,7 +46,8 @@ const CharList = (props) => {
         // initial: false - повторная загрузка по нажатию кнопки "показать еще"
         initial ? setNewItemLoading(false) : setNewItemLoading(true);     
         getAllCharacters(offset)
-        .then(onCharListLoaded)
+            .then(onCharListLoaded)
+            .then(() => setProcess('confirmed'))
     }
 
     // когда персонажи загрузились получаем новые данные, из которых будем формировать новое состояние
@@ -126,17 +146,22 @@ const CharList = (props) => {
         )
     }
 
-    const items = renderItems(charList);
+    // const items = renderItems(charList);
 
-    const errorMessage = error ?  <ErrorMessage/> : null;
-    const spinner = loading && !newItemLoading ? <Spinner/> : null; // есть загрузка, но не загрузка новых компонетов: 
+    // const errorMessage = error ?  <ErrorMessage/> : null;
+    // const spinner = loading && !newItemLoading ? <Spinner/> : null; // есть загрузка, но не загрузка новых компонетов: 
     // тогда спиннер грузится только при первой загрузке страницы. А при нажатии "показать еще" спиннера уже нет
 
     return (
         <div className="char__list">
-            {errorMessage}
+
+            {setContent(process, () => renderItems(charList), newItemLoading)}
+            {/* Здесь нет компонента View. Вместо него есть ф-я renderItems(charList), кот-я возвращает кусочек верстки.
+             Ее и передадим в качетсве компонента (второй арг)  */}
+
+            {/* {errorMessage}
             {spinner}
-            {items}
+            {items} */}
             <button 
                 className="button button__main button__long"
                 disabled={newItemLoading} 

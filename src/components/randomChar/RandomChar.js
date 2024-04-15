@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import Spinner from '../spinner/Spinner';
-import ErrorMessage from '../errorMessage/ErrorMessage';
 import useMarvelService from '../../services/MarvelService';
+import setContent from '../../utils/setContent';
 
 import './randomChar.scss';
 import mjolnir from '../../resources/img/mjolnir.png';
@@ -9,7 +8,7 @@ import mjolnir from '../../resources/img/mjolnir.png';
 const RandomChar = () => {
 
     const [char, setChar] = useState({});
-    const {loading, error, getCharacter, clearError} = useMarvelService();
+    const {getCharacter, clearError, process, setProcess} = useMarvelService();
 
     useEffect(() => {
         updateChar();
@@ -35,20 +34,22 @@ const RandomChar = () => {
         // example 1011005
         
         getCharacter(id)
-            .then(onCharLoaded);
+            .then(onCharLoaded)
+            .then(() => setProcess('confirmed'));
     }
 
     // если необходимо несколько вещей отображать в зависимости от состояний:
-    const errorMessage = error ?  <ErrorMessage/> : null;
-    const spinner = loading ? <Spinner/> : null;
-    const content = !(loading || error) ? <View char={char} /> : null; // контент помещается на страницу тогда, когда нет загрузки, но при этом нет ошибки
+    // const errorMessage = error ?  <ErrorMessage/> : null;
+    // const spinner = loading ? <Spinner/> : null;
+    // const content = !(loading || error) ? <View char={char} /> : null; // контент помещается на страницу тогда, когда нет загрузки, но при этом нет ошибки
 
     return (
         <div className="randomchar">
 
-            {errorMessage}
-            {spinner}
-            {content}
+            {setContent(process, View, char)}
+            {/* {errorMessage} */}
+            {/* {spinner} */}
+            {/* {content} */}
             {/* {loading ? <Spinner/> : <View char={char} />} */}
 
             <div className="randomchar__static">
@@ -69,8 +70,8 @@ const RandomChar = () => {
 }
 
 // простой рендерящий компонент
-const View = ({char}) => {
-    const {name, description, thumbnail, homepage, wiki} = char;
+const View = ({data}) => {
+    const {name, description, thumbnail, homepage, wiki} = data;
     let imgStyle = {'objectFit' : 'cover'};
     if (thumbnail === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg') {
         imgStyle = {'objectFit' : 'contain'};

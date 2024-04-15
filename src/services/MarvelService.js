@@ -3,7 +3,8 @@ import { useHttp } from "../hooks/http.hook";
 // файл MarvelService.js не будет переименовывать, тк это специализированный компонент, где раньше был класс, переписанный на хук
 // а вот к самому хуку добавим use
 const useMarvelService = () => {
-    const {loading, request, error, clearError} = useHttp();
+    // const {loading, request, error, clearError, process, setProcess} = useHttp();
+    const {request, clearError, process, setProcess} = useHttp();
 
     const _apiBase = 'https://gateway.marvel.com:443/v1/public/'; // пер-я начинается с подчеркивания - говорит о том, что это запрещено изменять
     const _apiKey = 'apikey=a69aadd3cee4bd52ac851e95515c1aaa';
@@ -73,9 +74,12 @@ const useMarvelService = () => {
         }
     };
 
-    return {loading, 
-            error, 
+    return {
+            // loading, 
+            // error, 
             clearError, 
+            process,
+            setProcess,
             getAllCharacters, 
             getCharacterByName,
             getCharacter, 
