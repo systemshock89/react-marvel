@@ -56,11 +56,11 @@ const CharList = (props) => {
 
         // формируем не 9 персонажей, а подгружаем каждый раз еще по 9. state зависит от предыдущуего stat'а. 
         // Вовзращаем объект из ф-и setState и передаем charList, подвергнутый деструктуризации
-        setCharList(charList => [...charList, ...newCharList]); // разворачиваем старый массив charList и добавляем newCharList
+        setCharList([...charList, ...newCharList]); // разворачиваем старый массив charList и добавляем newCharList
         // setLoading(loading => false);
-        setNewItemLoading(newItemLoading => false);
-        setOffset(offset => offset + 9)
-        setCharEnded(charEnded => ended);
+        setNewItemLoading(false);
+        setOffset(offset + 9);
+        setCharEnded(ended);
 
         // this.setState({
         //     charList, 
@@ -101,15 +101,15 @@ const CharList = (props) => {
                         ref={el => itemRefs.current[i] = el}
                         key={item.id}
                         onClick={() => {
+                            props.onCharSelected(item.id);
+                            focusOnItem(i);
+                        }}
+                        onKeyPress={(e) => {
+                            if (e.key === ' ' || e.key === "Enter") {
                                 props.onCharSelected(item.id);
                                 focusOnItem(i);
-                            }}
-                            onKeyPress={(e) => {
-                                if (e.key === ' ' || e.key === "Enter") {
-                                    props.onCharSelected(item.id);
-                                    focusOnItem(i);
-                                }
-                            }}>
+                            }
+                        }}>
                             <img src={item.thumbnail} alt={item.name} style={imgStyle}/>
                             <div className="char__name">{item.name}</div>
                     </li>
