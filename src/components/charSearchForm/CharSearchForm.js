@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import { Formik, Form, Field, ErrorMessage as FormikErrorMessage } from 'formik';
+import { Formik, Form, Field, ErrorMessage as FormikErrorMessage } from 'formik'; // переименуем ErrorMessage в FormikErrorMessage тк у нас уже есть компонент с таким именем
 import * as Yup from 'yup';
 import {Link} from 'react-router-dom';
 

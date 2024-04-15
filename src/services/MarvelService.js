@@ -23,6 +23,8 @@ const useMarvelService = () => {
 	// }
 
 	// Или можно создать отдельный метод для поиска по имени
+    // в API можно отсортировать персов по имени (пар-р name).
+    // в р-те получим массив, из кот-го берем первый элемент - нужный нам перс
     const getCharacterByName = async (name) => {
 		const res = await request(`${_apiBase}characters?name=${name}&${_apiKey}`);
 		return res.data.results.map(_transformCharacter);
